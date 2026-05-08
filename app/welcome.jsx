@@ -4,8 +4,14 @@ import ScreenWrapper from "../components/ScreenWrapper"
 import { theme } from '../constants/theme'
 import { hp, wp } from '../helpers/common'
 import Button from '../components/Button'
+import { useRouter } from 'expo-router'
 
-const Welcome = () => {
+const Welcome = () => { 
+   
+    const router = useRouter();
+signUp
+signUp
+signUp
     return (
         <ScreenWrapper bg={theme.colors.dark}>
             <StatusBar
@@ -35,15 +41,15 @@ const Welcome = () => {
 
                     <Button
                         title="Get started"
-                        onPress={() => router.push('/signup')}
+                        onPress={() => router.push('signUp')}
                         buttonStyle={styles.primaryButton}
                         textStyle={styles.primaryButtonText}
                         hasShadow={true}
                     />
 
-                    <Button
+                    <Button 
                         title="I already have an account"
-                        onPress={() => router.push('/login')}
+                        onPress={() => router.push('login')}
                         buttonStyle={styles.secondaryButton}
                         textStyle={styles.secondaryButtonText}
                         hasShadow={false}
