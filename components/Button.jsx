@@ -2,13 +2,14 @@ import { Pressable, StyleSheet, Text, View, ActivityIndicator } from 'react-nati
 import React from 'react'
 import { theme } from '../constants/theme'
 import { hp } from '../helpers/common'
+import Loading from './Loading'
 
 const Button = ({
   buttonStyle,
   textStyle,
   title = '',
   onPress = () => {},
-  loading = false,
+  loading = true,
   hasShadow = true,
 }) => {
 
@@ -23,7 +24,7 @@ const Button = ({
   if (loading) {
     return (
       <View style={[styles.button, buttonStyle, { opacity: 0.7 }]}>
-        <ActivityIndicator color="#fff" size="small" />
+       <Loading/>
       </View>
     )
   }
