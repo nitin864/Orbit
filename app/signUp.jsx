@@ -18,6 +18,7 @@ import BackButton from '../components/BackButton'
 import Button from '../components/Button'
 import { useRouter } from 'expo-router'
 import { hp, wp } from '../helpers/common'
+import { supabase } from '../lib/supabse'
 
 const SignUp = () => {
   const router = useRouter()
@@ -31,18 +32,43 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false)
 
   const handleSignUp = async () => {
-    if (!name || !email || !password) {
-      Alert.alert('Sign Up', 'Please fill in all fields')
-      return
-    }
-    if (password.length < 6) {
-      Alert.alert('Sign Up', 'Password must be at least 6 characters')
-      return
-    }
-    setLoading(true)
-     //actual logic to create account would go here
-    setTimeout(() => setLoading(false), 2000)
+  if (!name || !email || !password) {
+    Alert.alert('Sign Up', 'Please fill in all fields')
+    return
   }
+  if (password.length < 6) {
+    Alert.alert('Sign Up', 'Password must be at least 6 characters')
+    return
+  }
+
+  const trimmedName = name.trim()
+  const trimmedEmail = email.trim().toLowerCase()
+  const trimmedPassword = password.trim()
+
+  setLoading(true)
+
+  const { data: { session }, error } = await supabase.auth.signUp({
+    email: trimmedEmail,
+    password: trimmedPassword,
+    options: {
+      data: {
+        name: trimmedName,
+      }
+    }
+  })
+
+  setLoading(false)
+
+  if (error) {
+    Alert.alert('Sign Up Error', error.message)
+    return
+  }
+
+   
+  if (session) {
+    router.replace('welcome')
+  }
+}
 
   return (
     <ScreenWrapper bg={theme.colors.dark}>
