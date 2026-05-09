@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
 
-  // ── Hero ──────────────────────────────────────
+   
   hero: {
     backgroundColor: '#0F1419',
     height: hp(20),
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: hp(7),
-    width: '100%',          // ← add this
+    width: '100%',           
   },
 
   glitchText: {
@@ -291,22 +291,22 @@ const styles = StyleSheet.create({
     letterSpacing: -2,
     position: 'absolute',
     fontFamily: 'System',
-    textAlign: 'center',    // ← add this
-    width: '100%',          // ← add this
+    textAlign: 'center',     
+    width: '100%',           
   },
 
   glitchRed: {
     color: '#ff004c',
-    left: 0,                // ← change -3 to 0, use transform instead
+    left: 0,                 
     opacity: 0.65,
-    transform: [{ translateX: -3 }],  // ← move offset here
+    transform: [{ translateX: -3 }],   
   },
 
   glitchCyan: {
     color: '#00e5ff',
-    left: 0,                // ← change 3 to 0
+    left: 0,                
     opacity: 0.65,
-    transform: [{ translateX: 3 }],   // ← move offset here
+    transform: [{ translateX: 3 }],    
   },
 
   codeLine: {
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
     fontFamily: 'System',
   },
 
-  // ── Form Section ──────────────────────────────
+  
   formSection: {
     flex: 1,
     paddingHorizontal: wp(5),

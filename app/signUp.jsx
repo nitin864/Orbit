@@ -40,7 +40,7 @@ const SignUp = () => {
       return
     }
     setLoading(true)
-     
+     //actual logic to create account would go here
     setTimeout(() => setLoading(false), 2000)
   }
 
