@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native'
 import React, { useState } from 'react'
 import ScreenWrapper from '../components/ScreenWrapper'
@@ -29,7 +30,10 @@ const Login = () => {
 
   const handleLogin = async () => {
     setLoading(true)
-    // your auth logic here
+      if(!email && !password) {
+         Alert.alert('Login', 'Please enter your email and password');
+         return; 
+      }
     setTimeout(() => setLoading(false), 2000)
   }
 
