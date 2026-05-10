@@ -1,16 +1,41 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import { Stack } from 'expo-router'
+import { useEffect } from 'react';
+import { Stack, useRouter } from 'expo-router';
+import { AuthProvider, useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabse';
 
-const _layout = () => {
+const RootLayout = () => {
   return (
-    <Stack 
-      screenOptions={{
-        headerShown: false
-      }}
-     
-    />
-  )
-}
+    <AuthProvider>
+      <MainLayout />
+    </AuthProvider>
+  );
+};
 
-export default _layout
+const MainLayout = () => {
+  const { setAuth } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('session user: ', session?.user?.id);
+
+      if (session) {
+        setAuth(session?.user);
+        router.replace('/Home');
+      } else {
+        setAuth(null);
+        router.replace('/welcome');
+      }
+    });
+  }, []);
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+    />
+  );
+};
+
+export default RootLayout;
