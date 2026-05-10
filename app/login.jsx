@@ -18,6 +18,7 @@ import BackButton from '../components/BackButton'
 import Button from '../components/Button'
 import { useRouter } from 'expo-router'
 import { hp, wp } from '../helpers/common'
+import { supabase } from '../lib/supabse'
 
 const Login = () => {
   const router = useRouter()
@@ -29,13 +30,30 @@ const Login = () => {
   const [loading, setLoading] = useState(false)
 
   const handleLogin = async () => {
-    setLoading(true)
-      if(!email && !password) {
-         Alert.alert('Login', 'Please enter your email and password');
-         return; 
-      }
-    setTimeout(() => setLoading(false), 2000)
+  if (!email || !password) {
+    Alert.alert('Login', 'Please enter your email and password');
+    return;
   }
+
+  setLoading(true);
+
+  const trimmedEmail = email.trim().toLowerCase();
+  const trimmedPassword = password.trim();
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email: trimmedEmail,
+    password: trimmedPassword,
+  });
+  
+  console.log('error' , error)
+  if (error) {
+    Alert.alert('Login Error', error.message);
+    setLoading(false);
+    return;
+  }
+
+  setLoading(false);
+};
 
   return (
     <ScreenWrapper bg={theme.colors.dark}>
