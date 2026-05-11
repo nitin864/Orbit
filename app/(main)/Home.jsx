@@ -1,13 +1,15 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React, { use } from 'react'
 import ScreenWrapper from '../../components/ScreenWrapper'
 import { Button } from '@react-navigation/elements'
 import { supabase } from '../../lib/supabse'
 import { useAuth } from '../../context/AuthContext'
 
+
 const Home = () => {
 
-    const {setAuth} = useAuth()
+    const {setAuth} = useAuth();
+     
 
     const handleLogout = async () => {
          

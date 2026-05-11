@@ -51,7 +51,9 @@ const Login = () => {
     setLoading(false);
     return;
   }
-   
+  if(!error){
+    router.replace('/(main)')
+  }
 
   setLoading(false);
 };
