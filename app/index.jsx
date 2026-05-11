@@ -2,7 +2,7 @@ import { View, Text } from 'react-native'
 import React, { use } from 'react'
 import { Button } from '@react-navigation/elements'
 import { useRouter } from 'expo-router'
-import ScreenWrapper from "../components/ScreenWrapper"
+ 
 import Loading from '../components/Loading'
 
 const index = () => {

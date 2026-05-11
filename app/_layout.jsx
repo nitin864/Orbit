@@ -17,26 +17,34 @@ const MainLayout = () => {
   const router = useRouter();
 
   useEffect(() => {
-    supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('session user: ', session?.user?.id);
-
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session) {
-        setAuth(session?.user);
-        updatedUserData(session?.user);
-        router.replace('/Home');
+        setAuth(session.user);
+
+        let res = await getUserData(session.user.id);
+
+        if (res.success) {
+          setUserData(res.data);
+        }
+
+        requestAnimationFrame(() => {
+          router.replace('/(main)/home');
+        });
       } else {
         setAuth(null);
-        router.replace('/welcome');
+
+        requestAnimationFrame(() => {
+          router.replace('/(auth)/welcome');
+        });
       }
     });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
-
-  const updatedUserData = async (user) => {
-
-    let res = await getUserData(user?.id); 
-    if(res.success) setUserData(res.data);
-
-  }
 
   return (
     <Stack

@@ -22,7 +22,7 @@ const Home = () => {
   return (
     <ScreenWrapper>
         <Text>Home</Text>
-        <Button title = "logout" onPress={handleLogout} />
+        <Text onPress={handleLogout}>Logout</Text>
     </ScreenWrapper>
   )
 }

@@ -6,10 +6,10 @@ import {
   Image,
 } from 'react-native'
 import React from 'react'
-import ScreenWrapper from "../components/ScreenWrapper"
-import { theme } from '../constants/theme'
-import { hp, wp } from '../helpers/common'
-import Button from '../components/Button'
+import ScreenWrapper from "../../components/ScreenWrapper"
+import { theme } from '../../constants/theme'
+import { hp, wp } from '../../helpers/common'
+import Button from '../../components/Button'
 import { useRouter } from 'expo-router'
 
 const Welcome = () => {
@@ -42,7 +42,7 @@ const Welcome = () => {
           {/* Welcome image inside hero */}
           <Image
             style={styles.welcomeImage}
-            source={require('../assets/images/welcome.png')}
+            source={require('../../assets/images/welcome.png')}
             resizeMode='contain'
           />
 

@@ -11,14 +11,14 @@ import {
   Alert,
 } from 'react-native'
 import React, { useState } from 'react'
-import ScreenWrapper from '../components/ScreenWrapper'
-import { theme } from '../constants/theme'
-import Icon from '../assets/icons'
-import BackButton from '../components/BackButton'
-import Button from '../components/Button'
+import ScreenWrapper from '../../components/ScreenWrapper'
+import { theme } from '../../constants/theme'
+import Icon from '../../assets/icons'
+import BackButton from '../../components/BackButton'
+import Button from '../../components/Button'
 import { useRouter } from 'expo-router'
-import { hp, wp } from '../helpers/common'
-import { supabase } from '../lib/supabse'
+import { hp, wp } from '../../helpers/common'
+import { supabase } from '../../lib/supabse'
 
 const SignUp = () => {
   const router = useRouter()
