@@ -292,7 +292,7 @@ export default EditProfile
 
 const styles = StyleSheet.create({
 
-  // ── Top Bar ──────────────────────────────────
+   
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
