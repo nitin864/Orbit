@@ -8,8 +8,11 @@ import {
   Alert,
   StatusBar,
   TextInput,
+  ActivityIndicator,
 } from 'react-native'
 import React, { useState, useEffect } from 'react'
+import * as ImagePicker from 'expo-image-picker'
+import { Image } from 'expo-image'
 import ScreenWrapper from '../../components/ScreenWrapper'
 import { useAuth } from '../../context/AuthContext'
 import { useRouter } from 'expo-router'
@@ -19,20 +22,28 @@ import Icon from '../../assets/icons'
 import Avatar from '../../components/Avatar'
 import { supabase } from '../../lib/supabse'
 import BackButton from '../../components/BackButton'
-import { updateUserData } from '../../services/updateUserData'
+import { uploadImageToSupabase } from '../../services/imageUpload'
+
+
+
+ 
 
 const EditProfile = () => {
   const { user, refreshUserData } = useAuth()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [imageUploading, setImageUploading] = useState(false)
 
   const [form, setForm] = useState({
     name: '',
     bio: '',
     address: '',
     phoneNumber: '',
-    image: null,
+    image: null,          
   })
+
+   
+  const [localImageUri, setLocalImageUri] = useState(null)
 
   const [nameFocused, setNameFocused] = useState(false)
   const [bioFocused, setBioFocused] = useState(false)
@@ -51,6 +62,34 @@ const EditProfile = () => {
     }
   }, [user])
 
+  // ── image picker ─────────────────────────────────────────────────────────
+
+  const handlePickImage = async () => {
+    // Request permission
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permission required',
+        'Please allow access to your photo library to change your avatar.',
+      )
+      return
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],       
+      quality: 0.85,
+    })
+
+    if (result.canceled) return
+
+    const uri = result.assets[0].uri
+    setLocalImageUri(uri)    
+  }
+
+   
+
   const handleUpdate = async () => {
     if (!form.name.trim()) {
       Alert.alert('Edit Profile', 'Name cannot be empty')
@@ -59,31 +98,49 @@ const EditProfile = () => {
 
     setLoading(true)
 
-    const { data, error } = await supabase
-      .from('users')
-      .update({
-        name: form.name.trim(),
-        bio: form.bio.trim(),
-        address: form.address.trim(),
-        phoneNumber: form.phoneNumber.trim(),
-        image: form.image,
-      })
-      .eq('id', user.id)
-      .select()
-      .single()
+    try {
+      let imageUrl = form.image    
+      if (localImageUri) {
+        setImageUploading(true)
+        try {
+          imageUrl = await uploadImageToSupabase(localImageUri, user.id, form.image)
+        } catch (uploadErr) {
+          Alert.alert('Image upload failed', uploadErr.message)
+          setLoading(false)
+          setImageUploading(false)
+          return
+        }
+        setImageUploading(false)
+      }
 
-    setLoading(false)
+      const { error } = await supabase
+        .from('users')
+        .update({
+          name: form.name.trim(),
+          bio: form.bio.trim(),
+          address: form.address.trim(),
+          phoneNumber: form.phoneNumber.trim(),
+          image: imageUrl,
+        })
+        .eq('id', user.id)
 
-    if (error) {
-      Alert.alert('Update Failed', error.message)
-      return
+      if (error) {
+        Alert.alert('Update Failed', error.message)
+        return
+      }
+
+      await refreshUserData(user.id)
+      Alert.alert('Success', 'Profile updated successfully')
+      router.back()
+    } finally {
+      setLoading(false)
     }
-
-    await refreshUserData(user.id)
-
-    Alert.alert('Success', 'Profile updated successfully')
-    router.back()
   }
+
+  
+  const avatarSource = localImageUri || form.image
+
+   
 
   return (
     <ScreenWrapper bg={theme.colors.dark}>
@@ -93,7 +150,6 @@ const EditProfile = () => {
       <View style={styles.topBar}>
         <BackButton router={router} />
 
-        {/* Glitch title */}
         <View style={styles.glitchOuter}>
           <Text style={[styles.glitchText, styles.glitchRed]}>ORBIT</Text>
           <Text style={[styles.glitchText, styles.glitchCyan]}>ORBIT</Text>
@@ -105,9 +161,11 @@ const EditProfile = () => {
           onPress={handleUpdate}
           disabled={loading}
         >
-          <Text style={styles.saveBtnText}>
-            {loading ? 'Saving...' : 'Save'}
-          </Text>
+          {loading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.saveBtnText}>Save</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -119,40 +177,56 @@ const EditProfile = () => {
 
         {/* ── Cover Banner ── */}
         <View style={styles.coverBanner}>
-          <Text style={styles.codeLine}>
-            orbit.social // edit profile
-          </Text>
+          <Text style={styles.codeLine}>orbit.social // edit profile</Text>
         </View>
 
         {/* ── Avatar Section ── */}
         <View style={styles.avatarSection}>
-          <View style={styles.avatarWrap}>
-            <Avatar
-              uri={form.image}
-              size={hp(12)}
-              rounded={theme.radius.xl}
-              style={{ borderWidth: 3, borderColor: theme.colors.primary }}
-            />
-            <Pressable style={styles.avatarEditBtn}>
+          <Pressable style={styles.avatarWrap} onPress={handlePickImage}>
+            {/* Show local preview or remote avatar */}
+            {avatarSource ? (
+              <Image
+                source={{ uri: avatarSource }}
+                style={styles.avatarImage}
+                contentFit="cover"
+                transition={200}
+              />
+            ) : (
+              <Avatar
+                uri={null}
+                size={hp(12)}
+                rounded={theme.radius.xl}
+                style={{ borderWidth: 3, borderColor: theme.colors.primary }}
+              />
+            )}
+
+            {/* Upload overlay while uploading */}
+            {imageUploading && (
+              <View style={styles.avatarUploading}>
+                <ActivityIndicator color="#fff" />
+              </View>
+            )}
+
+            {/* Camera badge */}
+            <View style={styles.avatarEditBtn}>
               <Icon name="camera" size={14} color="#fff" strokeWidth={2} />
-            </Pressable>
-          </View>
-          <Text style={styles.avatarHint}>Tap to change photo</Text>
+            </View>
+          </Pressable>
+
+          <Text style={styles.avatarHint}>
+            {localImageUri ? '✓ New photo selected' : 'Tap to change photo'}
+          </Text>
         </View>
 
         {/* ── Form ── */}
         <View style={styles.form}>
 
-          {/* Section label */}
           <Text style={styles.sectionLabel}>— PERSONAL INFO —</Text>
 
           {/* Name */}
           <View style={styles.fieldWrap}>
             <Text style={styles.fieldLabel}>Full name</Text>
-            <View style={[
-              styles.inputWrapper,
-              nameFocused && styles.inputWrapperFocused
-            ]}>
+            <View style={[styles.inputWrapper, nameFocused && styles.inputWrapperFocused]}>
               <View style={styles.inputIcon}>
                 <Icon
                   name="user"
@@ -176,11 +250,7 @@ const EditProfile = () => {
           {/* Bio */}
           <View style={styles.fieldWrap}>
             <Text style={styles.fieldLabel}>Bio</Text>
-            <View style={[
-              styles.inputWrapper,
-              styles.bioWrapper,
-              bioFocused && styles.inputWrapperFocused
-            ]}>
+            <View style={[styles.inputWrapper, styles.bioWrapper, bioFocused && styles.inputWrapperFocused]}>
               <TextInput
                 style={[styles.input, styles.bioInput]}
                 placeholder="Tell your orbit about yourself..."
@@ -192,22 +262,19 @@ const EditProfile = () => {
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
+                maxLength={160}
               />
             </View>
             <Text style={styles.charCount}>{form.bio.length}/160</Text>
           </View>
 
-          {/* Divider */}
           <View style={styles.sectionDivider} />
           <Text style={styles.sectionLabel}>— CONTACT INFO —</Text>
 
           {/* Phone */}
           <View style={styles.fieldWrap}>
             <Text style={styles.fieldLabel}>Phone number</Text>
-            <View style={[
-              styles.inputWrapper,
-              phoneFocused && styles.inputWrapperFocused
-            ]}>
+            <View style={[styles.inputWrapper, phoneFocused && styles.inputWrapperFocused]}>
               <View style={styles.inputIcon}>
                 <Icon
                   name="call"
@@ -232,10 +299,7 @@ const EditProfile = () => {
           {/* Address */}
           <View style={styles.fieldWrap}>
             <Text style={styles.fieldLabel}>Location</Text>
-            <View style={[
-              styles.inputWrapper,
-              addressFocused && styles.inputWrapperFocused
-            ]}>
+            <View style={[styles.inputWrapper, addressFocused && styles.inputWrapperFocused]}>
               <View style={styles.inputIcon}>
                 <Icon
                   name="location"
@@ -258,30 +322,30 @@ const EditProfile = () => {
 
         </View>
 
-        {/* ── Update Button ── */}
+        {/* ── Buttons ── */}
         <View style={styles.btnWrap}>
           <TouchableOpacity
             style={styles.updateBtn}
             onPress={handleUpdate}
             disabled={loading}
           >
-            <Text style={styles.updateBtnText}>
-              {loading ? 'Updating...' : 'Update profile'}
-            </Text>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.updateBtnText}>Update profile</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.cancelBtn}
             onPress={() => router.back()}
+            disabled={loading}
           >
             <Text style={styles.cancelBtnText}>Cancel</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Bottom tag */}
-        <Text style={styles.bottomTag}>
-          ORBIT.SOCIAL // FIND YOUR ORBIT
-        </Text>
+        <Text style={styles.bottomTag}>ORBIT.SOCIAL // FIND YOUR ORBIT</Text>
 
       </ScrollView>
     </ScreenWrapper>
@@ -290,9 +354,10 @@ const EditProfile = () => {
 
 export default EditProfile
 
+// ─── styles ────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
 
-   
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -321,7 +386,6 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: -1,
-    fontFamily: 'System',
   },
 
   glitchRed: {
@@ -341,23 +405,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(4),
     paddingVertical: hp(1),
     borderRadius: theme.radius.xs,
+    minWidth: wp(14),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   saveBtnText: {
     color: '#fff',
     fontSize: hp(1.7),
     fontWeight: '700',
-    fontFamily: 'System',
     letterSpacing: 0.3,
   },
 
-  // ── Scroll ───────────────────────────────────
   scrollContent: {
     flexGrow: 1,
     paddingBottom: hp(6),
   },
 
-  // ── Cover Banner ─────────────────────────────
   coverBanner: {
     height: hp(8),
     backgroundColor: '#0a0c10',
@@ -372,10 +436,8 @@ const styles = StyleSheet.create({
     color: '#1D9BF0',
     opacity: 0.4,
     letterSpacing: 1,
-    fontFamily: 'System',
   },
 
-  // ── Avatar ───────────────────────────────────
   avatarSection: {
     alignItems: 'center',
     paddingVertical: hp(3),
@@ -386,6 +448,25 @@ const styles = StyleSheet.create({
 
   avatarWrap: {
     position: 'relative',
+    width: hp(12),
+    height: hp(12),
+  },
+
+  avatarImage: {
+    width: hp(12),
+    height: hp(12),
+    borderRadius: theme.radius.xl,
+    borderWidth: 3,
+    borderColor: theme.colors.primary,
+  },
+
+  avatarUploading: {
+    position: 'absolute',
+    inset: 0,
+    borderRadius: theme.radius.xl,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   avatarEditBtn: {
@@ -405,10 +486,8 @@ const styles = StyleSheet.create({
   avatarHint: {
     fontSize: hp(1.5),
     color: theme.colors.textLight,
-    fontFamily: 'System',
   },
 
-  // ── Form ─────────────────────────────────────
   form: {
     paddingHorizontal: wp(5),
     paddingTop: hp(2.5),
@@ -420,7 +499,6 @@ const styles = StyleSheet.create({
     letterSpacing: 4,
     color: '#1D9BF0',
     opacity: 0.8,
-    fontFamily: 'System',
     fontWeight: '400',
     textAlign: 'center',
     marginBottom: 4,
@@ -439,7 +517,6 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: hp(1.55),
     color: theme.colors.textLight,
-    fontFamily: 'System',
     fontWeight: '500',
     paddingLeft: 4,
   },
@@ -473,7 +550,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: hp(1.9),
     color: '#FFFFFF',
-    fontFamily: 'System',
     letterSpacing: 0.2,
   },
 
@@ -486,11 +562,9 @@ const styles = StyleSheet.create({
     fontSize: hp(1.4),
     color: theme.colors.textLight,
     textAlign: 'right',
-    fontFamily: 'System',
     paddingRight: 4,
   },
 
-  // ── Buttons ──────────────────────────────────
   btnWrap: {
     paddingHorizontal: wp(5),
     paddingTop: hp(3),
@@ -503,6 +577,8 @@ const styles = StyleSheet.create({
     paddingVertical: hp(1.9),
     borderRadius: theme.radius.xs,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: hp(6.5),
     shadowColor: theme.colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
@@ -515,7 +591,6 @@ const styles = StyleSheet.create({
     fontSize: hp(2),
     fontWeight: '900',
     letterSpacing: 0.5,
-    fontFamily: 'System',
   },
 
   cancelBtn: {
@@ -532,17 +607,14 @@ const styles = StyleSheet.create({
     color: theme.colors.textDark,
     fontSize: hp(2),
     fontWeight: '500',
-    fontFamily: 'System',
     letterSpacing: 0.2,
   },
 
-  // ── Bottom Tag ───────────────────────────────
   bottomTag: {
     textAlign: 'center',
     fontSize: hp(1.1),
     letterSpacing: 3,
     color: '#2F3336',
-    fontFamily: 'System',
     marginTop: hp(3),
   },
 
