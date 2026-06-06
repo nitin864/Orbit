@@ -41,5 +41,6 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.gray?.[300] || '#e0e0e0',
         borderWidth: 1,
         borderColor: theme.colors.gray?.[400] || '#ccc',
+        marginLeft: hp(2),
     },
 });
