@@ -1,66 +1,70 @@
-import { StyleSheet, Text, View } from "react-native";
-import { RichToolbar, actions } from "react-native-pell-rich-editor";
+import { StyleSheet, View } from "react-native";
+import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
+import { theme } from "../constants/theme";
 
-const RichTextEditor = ({ editorRef }) => {
-  return (
-    <View style={styles.container}>
-      <RichToolbar
-  editor={editorRef}
-  actions={[
-    actions.heading1,
-    actions.heading2,
-    actions.heading3,
+const RichTextEditor = ({ editorRef, onChange }) => {
+    return (
+        <View style={styles.container}>
+            <RichToolbar
+                editor={editorRef}
+                actions={[
+                    actions.setBold,
+                    actions.setItalic,
+                    actions.setUnderline,
+                    actions.setStrikethrough,
 
-    actions.setBold,
-    actions.setItalic,
-    actions.setUnderline,
-    actions.setStrikethrough,
+                    actions.insertBulletsList,
+                    actions.insertOrderedList,
+                    actions.checkboxList,
 
-    actions.insertBulletsList,
-    actions.insertOrderedList,
-    actions.checkboxList,
+                    actions.insertLink,
+                    actions.insertImage,
+                    actions.insertVideo,
 
-    actions.insertLink,
-    actions.insertImage,
-    actions.insertVideo,
+                    actions.undo,
+                    actions.redo,
+                    actions.removeFormat,
+                ]}
+                style={styles.richbar}
+                flatContainerStyle={styles.richbarContainer}
+                selectedIconTint={theme.colors.primary}
+                disabled={false}
+            />
 
-    actions.undo,
-    actions.redo,
-    actions.removeFormat,
-  ]}
-  iconMap={{
-    [actions.heading1]: ({ tintColor }) => (
-      <Text style={{ color: tintColor, fontWeight: "bold" }}>
-        H1
-      </Text>
-    ),
-    [actions.heading2]: ({ tintColor }) => (
-      <Text style={{ color: tintColor, fontWeight: "bold" }}>
-        H2
-      </Text>
-    ),
-    [actions.heading3]: ({ tintColor }) => (
-      <Text style={{ color: tintColor, fontWeight: "bold" }}>
-        H3
-      </Text>
-    ),
-  }}
-/>
-    </View>
-  );
+            <RichEditor
+                ref={editorRef}
+                containerStyle={styles.rich}
+                editorStyle={styles.contentStyle}
+                placeholder="Share your orbit with the world..."
+                initialHeight={150}
+                onChange={onChange}
+            />
+        </View>
+    );
 };
 
 export default RichTextEditor;
 
 const styles = StyleSheet.create({
-  container: {
-    minHeight: 50,
-  },
-  richbar: {
-    borderRadius: 10,
-  },
-  richbarContainer: {
-    borderRadius: 10,
-    paddingVertical: 8,
-  },
+    container: {
+        minHeight: 50,
+    },
+    richbar: {
+        borderTopRightRadius: theme.radius.xl,
+        borderTopLeftRadius: theme.radius.xl,
+        backgroundColor: theme.colors.darkLight,
+    },
+    richbarContainer: {
+        borderRadius: 10,
+        paddingVertical: 8,
+    },
+    rich:{
+        backgroundColor: theme.colors.darkLight,
+        borderBottomLeftRadius: theme.radius.xl,
+        borderBottomRightRadius: theme.radius.xl,   
+    },
+    contentStyle: {
+        color: theme.colors.text,
+        fontSize: 16,
+    },
 });
