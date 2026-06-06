@@ -38,6 +38,7 @@ const RichTextEditor = ({ editorRef, onChange }) => {
                 placeholder="Share your orbit with the world..."
                 initialHeight={150}
                 onChange={onChange}
+                useContainer={true}
             />
         </View>
     );
@@ -47,24 +48,44 @@ export default RichTextEditor;
 
 const styles = StyleSheet.create({
     container: {
-        minHeight: 50,
+        marginTop: 12,
+        overflow: "hidden",
+        borderRadius: theme.radius.xl,
     },
+
     richbar: {
-        borderTopRightRadius: theme.radius.xl,
+        backgroundColor: "#161B22",
         borderTopLeftRadius: theme.radius.xl,
-        backgroundColor: theme.colors.darkLight,
+        borderTopRightRadius: theme.radius.xl,
+        borderBottomWidth: 1,
+        borderBottomColor: "rgba(255,255,255,0.08)",
+        paddingHorizontal: 6,
+        marginBottom: 40
     },
+
     richbarContainer: {
-        borderRadius: 10,
-        paddingVertical: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 4,
     },
-    rich:{
-        backgroundColor: theme.colors.darkLight,
+
+    rich: {
+        minHeight: 280,
+        backgroundColor: "#0F1419",
+        borderWidth: 1.5,
+        borderTopWidth: 0,
+        borderColor: "rgba(29,155,240,0.25)",
         borderBottomLeftRadius: theme.radius.xl,
-        borderBottomRightRadius: theme.radius.xl,   
+        borderBottomRightRadius: theme.radius.xl,
+        overflow: "hidden",
     },
+
     contentStyle: {
-        color: theme.colors.text,
+        backgroundColor: "#0F1419",
+        color: "#E7E9EA",
+        caretColor: theme.colors.primary,
+        paddingHorizontal: 16,
+        paddingVertical: 16,
         fontSize: 16,
+        lineHeight: 26,
     },
 });
