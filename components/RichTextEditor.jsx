@@ -100,17 +100,18 @@ const styles = StyleSheet.create({
 
     richbarContainer: {
         paddingVertical: 8,
-        paddingHorizontal: 4,
+        paddingHorizontal: 6,
+        gap: 5
     },
 
     rich: {
         minHeight: 300,
         backgroundColor: "#0F1419",
-
         borderWidth: 1,
         borderColor: "rgba(29,155,240,0.18)",
-
+    
         borderRadius: 24,
         overflow: "hidden",
     },
+     
 });
