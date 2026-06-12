@@ -18,7 +18,7 @@ const RichTextEditor = ({ editorRef, onChange }) => {
                         actions.setItalic,
                         actions.setUnderline,
                         actions.setStrikethrough,
-
+                        actions.code,
                         actions.insertBulletsList,
                         actions.insertOrderedList,
                         actions.checkboxList,
@@ -26,7 +26,7 @@ const RichTextEditor = ({ editorRef, onChange }) => {
                         actions.insertLink,
                         actions.insertImage,
                         actions.insertVideo,
-
+                      
                         actions.undo,
                         actions.redo,
 
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     richbarContainer: {
         paddingVertical: 8,
         paddingHorizontal: 6,
-        gap: 5
+        gap: 5  
     },
 
     rich: {
