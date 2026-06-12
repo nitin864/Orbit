@@ -1,6 +1,7 @@
 import { useRouter as userRouter } from 'expo-router'
 import { useRef, useState } from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import Icons from '../../assets/icons'
 import Avatar from '../../components/Avatar'
 import Header from '../../components/Header'
 import RichTextEditor from '../../components/RichTextEditor'
@@ -39,8 +40,13 @@ const NewPost = () => {
             <RichTextEditor editorRef={editorRef} onChange={body => bodyRef.current = body}/>
           </View>
 
-          <View Style = {styles.media}>
+          <View style = {styles.media}>
               <Text styles= {styles.mediaText}>Add to your post</Text>
+              <View style = {styles.mediaIcon}>
+                 <TouchableOpacity>
+                    <Icons name= "image" size={30} color={theme.colors.dark}/>
+                 </TouchableOpacity>e
+              </View>
           </View>
         </ScrollView>
       </View>
@@ -85,7 +91,8 @@ handle: {
   fontSize: hp(1.9),
 },
 media: {
-  flexdirection: 'row',
+  marginTop: hp(4),
+  flexDirection: 'row',
   justifyContent: "space-between",
   alignItems: 'center',
   borderWidth: 1.5,
