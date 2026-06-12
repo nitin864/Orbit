@@ -26,7 +26,7 @@ const RichTextEditor = ({ editorRef, onChange }) => {
                         actions.insertLink,
                         actions.insertImage,
                         actions.insertVideo,
-                      
+
                         actions.undo,
                         actions.redo,
 
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     richbarContainer: {
         paddingVertical: 8,
         paddingHorizontal: 6,
-        gap: 5  
+        gap: 5
     },
 
     rich: {
@@ -109,9 +109,9 @@ const styles = StyleSheet.create({
         backgroundColor: "#0F1419",
         borderWidth: 1,
         borderColor: "rgba(29,155,240,0.18)",
-    
+
         borderRadius: 24,
         overflow: "hidden",
     },
-     
+
 });

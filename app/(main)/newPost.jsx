@@ -38,6 +38,10 @@ const NewPost = () => {
           <View style = {styles.textEditor}>
             <RichTextEditor editorRef={editorRef} onChange={body => bodyRef.current = body}/>
           </View>
+
+          <View Style = {styles.media}>
+              <Text styles= {styles.mediaText}>Add to your post</Text>
+          </View>
         </ScrollView>
       </View>
     </ScreenWrapper>
@@ -80,4 +84,20 @@ handle: {
   fontWeight: '500',
   fontSize: hp(1.9),
 },
+media: {
+  flexdirection: 'row',
+  justifyContent: "space-between",
+  alignItems: 'center',
+  borderWidth: 1.5,
+  padding: 12,
+  paddingHorizontal: 18,
+  borderColor: theme.colors.gray,
+  borderRadius: theme.radius.sm,
+  borderCurve: 'continuous',
+},
+mediaIcon: {
+  flexDirection: 'row',
+  alighnItems: 'center',
+  gap: 15,
+}
 })
