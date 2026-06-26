@@ -46,6 +46,8 @@ const NewPost = () => {
 
     const result = await ImagePicker.launchImageLibraryAsync(mediConfig);
 
+
+    console.log("Picked file:", result.assets[0]);
     if (!result.canceled) {
       setFile(result.assets[0]);
     }
@@ -61,6 +63,13 @@ const NewPost = () => {
     if(isLocalFile(file)){
       return file.type;
     }
+
+    //check image or video based on file extension
+    if(file.includes('postImage')){
+      return 'image';
+    }
+    return 'video';
+
   }
   const onSubmit = async (body, file) => {
 
