@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import Icons from '../../assets/icons'
 import Avatar from '../../components/Avatar'
+import Button from '../../components/Button'
 import Header from '../../components/Header'
 import RichTextEditor from '../../components/RichTextEditor'
 import ScreenWrapper from '../../components/ScreenWrapper'
@@ -18,7 +19,14 @@ const NewPost = () => {
   const router = userRouter()
   const [loading, setLoading] = useState(false);
   const [file , setFlile] = useState(null)
-  const onPick = () => {};
+  const onPick = async(isImage) => {
+
+  };
+
+  const onSubmit = async(body, file) => {
+
+
+  }
 
   return (
     <ScreenWrapper bg ={theme.colors.dark}>
@@ -43,12 +51,22 @@ const NewPost = () => {
           <View style = {styles.media}>
               <Text style= {styles.mediaText}>Add to your post</Text>
               <View style = {styles.mediaIcon}>
-                 <TouchableOpacity onPress={onPick}>
-                    <Icons name= "image" size={30} color={theme.colors.dark}/>
+                 <TouchableOpacity onPress={() => onPick(true)}>
+                    <Icons name= "image" size={30} color={theme.colors.textLight}/>
+                 </TouchableOpacity>
+                 <TouchableOpacity onPress={() => onPick(false)}>
+                    <Icons name= "video" size={33} color={theme.colors.textLight}/>
                  </TouchableOpacity>
               </View>
           </View>
         </ScrollView>
+        <Button
+          buttonStyle={{height: hp(6.2), marginBottom: hp(2),borderRadius: theme.radius.xs}}
+          title="Post"
+          loading={loading}
+          hasShadow={false}
+          onPress={() => {onSubmit(bodyRef.current, file)}}
+        />
       </View>
     </ScreenWrapper>
   )
@@ -106,5 +124,11 @@ mediaIcon: {
   flexDirection: 'row',
   alighnItems: 'center',
   gap: 15,
-}
+},
+mediaText: {
+  color: theme.colors.textLight,
+  fontFamily: theme.fonts.semibold,
+  fontWeight: '500',
+  fontSize: hp(2),
+},
 })
