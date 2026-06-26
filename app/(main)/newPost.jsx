@@ -1,8 +1,9 @@
+import { Image } from "expo-image"
 import * as ImagePicker from 'expo-image-picker'
 import { useRouter as userRouter } from 'expo-router'
 import { useRef, useState } from 'react'
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import Icons from '../../assets/icons'
+import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { default as Icon, default as Icons } from '../../assets/icons'
 import Avatar from '../../components/Avatar'
 import Button from '../../components/Button'
 import Header from '../../components/Header'
@@ -11,6 +12,7 @@ import ScreenWrapper from '../../components/ScreenWrapper'
 import { theme } from '../../constants/theme'
 import { useAuth } from '../../context/AuthContext'
 import { hp, wp } from '../../helpers/common'
+import { uploadImageToSupabase } from '../../services/imageUpload'
 
 const NewPost = () => {
 
@@ -53,28 +55,40 @@ const NewPost = () => {
     }
   };
 
-  const isLocalFile = (file)=>{
-    if(!file) return null;
-    if(typeof file === "object") return true;
+  const isLocalFile = (file) => {
+    if (!file) return null;
+    if (typeof file === "object") return true;
     return false;
   }
   const getFileType = file => {
     if (!file) return null;
-    if(isLocalFile(file)){
+    if (isLocalFile(file)) {
       return file.type;
     }
 
     //check image or video based on file extension
-    if(file.includes('postImage')){
+    if (file.includes('postImage')) {
       return 'image';
     }
     return 'video';
 
   }
+
+  const getFileUri = file => {
+    if (!file) return null;
+    if (isLocalFile(file)) {
+      return file.uri;
+    }
+
+    return uploadImageToSupabase(file)?.uri;
+  }
   const onSubmit = async (body, file) => {
 
 
   }
+
+
+
 
   return (
     <ScreenWrapper bg={theme.colors.dark}>
@@ -99,13 +113,22 @@ const NewPost = () => {
           {
             file && (
               <View style={styles.file}>
-                {
-                  getFileType(file.uri) === 'video' ? (
-                    <></>
-                  ) : (
-                    <></>
-                  )
-                }
+                {file.type === "video" ? (
+                  <></>
+                ) : (
+                  <View style={styles.file}>
+                    <Image
+                      source={{ uri: file.uri }}
+                      style={styles.previewImage}
+                      contentFit="cover"
+                      transition={250}
+                    />
+                  </View>
+                )}
+
+                <Pressable style={{ position: 'absolute', top: 10, right: 10 }} onPress={() => setFile(null)}>
+                   <Icon name="delete" size={25} color={theme.colors.rose} />
+                </Pressable>
               </View>
             )
           }
@@ -198,6 +221,33 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: theme.radius.xl,
     overflow: 'hidden',
-    borcurve: 'continuous',
-  }
+    borderCurve: 'continuous',
+  },
+  file: {
+  width: "100%",
+  height: hp(30),
+
+  backgroundColor: "#1F2937",
+
+  borderRadius: 20,
+  overflow: "hidden",
+
+  borderWidth: 1,
+  borderColor: "rgba(255,255,255,0.08)",
+
+  elevation: 5,
+  shadowColor: "#000",
+  shadowOffset: {
+    width: 0,
+    height: 4,
+  },
+  shadowOpacity: 0.15,
+  shadowRadius: 8,
+},
+
+previewImage: {
+  width: "100%",
+  height: "100%",
+  borderRadius: 20, 
+},
 })
