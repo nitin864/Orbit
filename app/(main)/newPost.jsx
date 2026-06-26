@@ -1,6 +1,7 @@
 import { Image } from "expo-image"
 import * as ImagePicker from 'expo-image-picker'
 import { useRouter as userRouter } from 'expo-router'
+import { VideoView, useVideoPlayer } from "expo-video"
 import { useRef, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { default as Icon, default as Icons } from '../../assets/icons'
@@ -13,6 +14,8 @@ import { theme } from '../../constants/theme'
 import { useAuth } from '../../context/AuthContext'
 import { hp, wp } from '../../helpers/common'
 import { uploadImageToSupabase } from '../../services/imageUpload'
+ 
+
 
 const NewPost = () => {
 
@@ -87,6 +90,11 @@ const NewPost = () => {
 
   }
 
+  const player = useVideoPlayer(file?.uri ?? "", (player) => {
+    player.loop = true;
+    player.play();
+  });
+
 
 
 
@@ -114,7 +122,12 @@ const NewPost = () => {
             file && (
               <View style={styles.file}>
                 {file.type === "video" ? (
-                  <></>
+                  <VideoView
+                    player={player}
+                    style={styles.previewImage}
+                    nativeControls
+                    contentFit="cover"
+                  />
                 ) : (
                   <View style={styles.file}>
                     <Image
@@ -127,7 +140,7 @@ const NewPost = () => {
                 )}
 
                 <Pressable style={{ position: 'absolute', top: 10, right: 10 }} onPress={() => setFile(null)}>
-                   <Icon name="delete" size={25} color={theme.colors.rose} />
+                  <Icon name="delete" size={25} color={theme.colors.rose} />
                 </Pressable>
               </View>
             )
@@ -224,30 +237,30 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
   },
   file: {
-  width: "100%",
-  height: hp(30),
+    width: "100%",
+    height: hp(30),
 
-  backgroundColor: "#1F2937",
+    backgroundColor: "#1F2937",
 
-  borderRadius: 20,
-  overflow: "hidden",
+    borderRadius: 20,
+    overflow: "hidden",
 
-  borderWidth: 1,
-  borderColor: "rgba(255,255,255,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
 
-  elevation: 5,
-  shadowColor: "#000",
-  shadowOffset: {
-    width: 0,
-    height: 4,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
   },
-  shadowOpacity: 0.15,
-  shadowRadius: 8,
-},
 
-previewImage: {
-  width: "100%",
-  height: "100%",
-  borderRadius: 20, 
-},
+  previewImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 20,
+  },
 })
