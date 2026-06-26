@@ -25,7 +25,7 @@ const NewPost = () => {
     if (status !== 'granted') {
       Alert.alert(
         'Permission required',
-        'Please allow access to your photo library to change your avatar.',
+        'Please allow access to your photo library to post media.',
       )
       return
     }
@@ -51,6 +51,17 @@ const NewPost = () => {
     }
   };
 
+  const isLocalFile = (file)=>{
+    if(!file) return null;
+    if(typeof file === "object") return true;
+    return false;
+  }
+  const getFileType = file => {
+    if (!file) return null;
+    if(isLocalFile(file)){
+      return file.type;
+    }
+  }
   const onSubmit = async (body, file) => {
 
 
@@ -75,6 +86,20 @@ const NewPost = () => {
           <View style={styles.textEditor}>
             <RichTextEditor editorRef={editorRef} onChange={body => bodyRef.current = body} />
           </View>
+
+          {
+            file && (
+              <View style={styles.file}>
+                {
+                  getFileType(file.uri) === 'video' ? (
+                    <></>
+                  ) : (
+                    <></>
+                  )
+                }
+              </View>
+            )
+          }
 
           <View style={styles.media}>
             <Text style={styles.mediaText}>Add to your post</Text>
@@ -159,4 +184,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontSize: hp(2),
   },
+  file: {
+    height: hp(30),
+    width: '100%',
+    borderRadius: theme.radius.xl,
+    overflow: 'hidden',
+    borcurve: 'continuous',
+  }
 })
