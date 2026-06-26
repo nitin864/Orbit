@@ -86,7 +86,19 @@ const NewPost = () => {
     return uploadImageToSupabase(file)?.uri;
   }
   const onSubmit = async (body, file) => {
+   
+    if (!bodyRef.current && !file) {
+        Alert.alert('Post', 'Please enter some text or select a file to post.');
+      return;
+    }
 
+    let data = {
+      file,
+      body: bodyRef.current,
+      userId: user?.id,
+    }
+
+    //create post
 
   }
 
