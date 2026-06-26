@@ -18,7 +18,7 @@ const NewPost = () => {
   const router = userRouter()
   const [loading, setLoading] = useState(false);
   const [file , setFlile] = useState(null)
-  
+  const onPick = () => {};
 
   return (
     <ScreenWrapper bg ={theme.colors.dark}>
@@ -41,11 +41,11 @@ const NewPost = () => {
           </View>
 
           <View style = {styles.media}>
-              <Text styles= {styles.mediaText}>Add to your post</Text>
+              <Text style= {styles.mediaText}>Add to your post</Text>
               <View style = {styles.mediaIcon}>
-                 <TouchableOpacity>
+                 <TouchableOpacity onPress={onPick}>
                     <Icons name= "image" size={30} color={theme.colors.dark}/>
-                 </TouchableOpacity>e
+                 </TouchableOpacity>
               </View>
           </View>
         </ScrollView>
