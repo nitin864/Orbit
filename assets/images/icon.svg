@@ -1,0 +1,13 @@
+<svg width="400" height="400" viewBox="0 0 400 400" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>Orbit app logo — icon</title>
+  <rect x="0" y="0" width="400" height="400" rx="80" fill="#0F1419"/>
+  <g transform="translate(200,200) rotate(-35)">
+    <circle cx="0" cy="0" r="62" fill="#1D9BF0"/>
+    <ellipse cx="0" cy="0" rx="130" ry="42" fill="none" stroke="#1D9BF0" stroke-width="5.5" opacity="0.7"/>
+    <ellipse cx="0" cy="0" rx="178" ry="62" fill="none" stroke="#1D9BF0" stroke-width="3.5" opacity="0.4"/>
+    <circle cx="130"  cy="0"   r="13"  fill="#1D9BF0" opacity="0.9"/>
+    <circle cx="-130" cy="0"   r="11"  fill="#1D9BF0" opacity="0.7"/>
+    <circle cx="65"   cy="-38" r="8"   fill="#AAB8C2" opacity="0.6"/>
+    <circle cx="-65"  cy="38"  r="6.5" fill="#AAB8C2" opacity="0.5"/>
+  </g>
+</svg>
