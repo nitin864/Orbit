@@ -86,33 +86,50 @@ const NewPost = () => {
 
     return uploadImageToSupabase(file)?.uri;
   }
+  
   const onSubmit = async (body, file) => {
-   
-    if (!bodyRef.current && !file) {
-        Alert.alert('Post', 'Please enter some text or select a file to post.');
-      return;
-    }
-
-    let data = {
-      file,
-      body: bodyRef.current,
-      userId: user?.id,
-    }
-
-    //create post
-    setLoading(true);
-    let res = createOrUpdatePost(data);
-    setLoading(false);
-    if(res.success){
-       setFile(null);
-       bodyRef.current = '';
-       editorRef.current?.setContentHTML('');
-       router.back()
-    }else{
-      Alert.alert('Post', res.msg)
-    }
-     
+  if (!bodyRef.current && !file) {
+    Alert.alert(
+      'Post',
+      'Please enter some text or select a file to post.'
+    );
+    return;
   }
+
+  const data = {
+    file,
+    body: bodyRef.current,
+    userId: user?.id,
+  };
+
+  try {
+    // Create post
+    setLoading(true);
+
+    const res = await createOrUpdatePost(data);
+
+    if (res.success) {
+      setFile(null);
+
+      bodyRef.current = '';
+
+      editorRef.current?.setContentHTML('');
+
+      router.back();
+    } else {
+      Alert.alert('Post', res.msg);
+    }
+  } catch (error) {
+    console.log('Post creation error:', error);
+
+    Alert.alert(
+      'Post',
+      'Something went wrong while creating your post.'
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   const player = useVideoPlayer(file?.uri ?? "", (player) => {
     player.loop = true;
