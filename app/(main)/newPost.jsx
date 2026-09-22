@@ -3,7 +3,7 @@ import * as ImagePicker from 'expo-image-picker'
 import { useRouter as userRouter } from 'expo-router'
 import { VideoView, useVideoPlayer } from "expo-video"
 import { useRef, useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { default as Icon, default as Icons } from '../../assets/icons'
 import Avatar from '../../components/Avatar'
 import Button from '../../components/Button'
@@ -103,7 +103,15 @@ const NewPost = () => {
     setLoading(true);
     let res = createOrUpdatePost(data);
     setLoading(false);
-    console.log('post res', res)
+    if(res.success){
+       setFile(null);
+       bodyRef.current = '';
+       editorRef.current?.setContentHTML('');
+       router.back()
+    }else{
+      Alert.alert('Post', res.msg)
+    }
+     
   }
 
   const player = useVideoPlayer(file?.uri ?? "", (player) => {

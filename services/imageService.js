@@ -1,13 +1,20 @@
- 
+import { decode } from 'base64-arraybuffer';
+import * as FileSystem from 'expo-file-system/legacy';
+import { supabase } from '../lib/supabse';
+
 export const getUserImage = (imagePath) => {
-    if (imagePath) {
-        return { uri: imagePath };            
-    } else {
-        return require('../assets/images/default.png');  
-    }
+  if (imagePath) {
+    return { uri: imagePath };
+  }
+
+  return require('../assets/images/default.png');
 };
 
-export const uploadFile = async (folderName, fileUri, isImage = true) => {
+export const uploadFile = async (
+  folderName,
+  fileUri,
+  isImage = true
+) => {
   try {
     const fileName = getFilePath(folderName, isImage);
 
@@ -15,33 +22,33 @@ export const uploadFile = async (folderName, fileUri, isImage = true) => {
       encoding: FileSystem.EncodingType.Base64,
     });
 
-    const imageData = decode(fileBase64); // array buffer
+    const fileData = decode(fileBase64);
 
-    const { data, error } = await supabase
-      .storage
+    const { data, error } = await supabase.storage
       .from('uploads')
-      .upload(fileName, imageData, {
+      .upload(fileName, fileData, {
         cacheControl: '3600',
         upsert: false,
-        contentType: isImage ? 'image/*' : 'video/*',
+        contentType: isImage ? 'image/jpeg' : 'video/mp4',
       });
 
     if (error) {
-      console.log('file upload error: ', error);
+      console.log('file upload error:', error);
+
       return {
         success: false,
         msg: 'Could not upload media',
       };
     }
 
-    console.log('data: ', data);
+    console.log('Upload data:', data);
 
     return {
       success: true,
       data: data.path,
     };
   } catch (error) {
-    console.log('file upload error: ', error);
+    console.log('file upload error:', error);
 
     return {
       success: false,
@@ -51,5 +58,5 @@ export const uploadFile = async (folderName, fileUri, isImage = true) => {
 };
 
 export const getFilePath = (folderName, isImage) => {
-  return `/${folderName}/${new Date().getTime()}${isImage ? '.png' : '.mp4'}`;
+  return `/${folderName}/${Date.now()}${isImage ? '.jpg' : '.mp4'}`;
 };
