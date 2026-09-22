@@ -14,6 +14,7 @@ import { theme } from '../../constants/theme'
 import { useAuth } from '../../context/AuthContext'
 import { hp, wp } from '../../helpers/common'
 import { uploadImageToSupabase } from '../../services/imageUpload'
+import { createOrUpdatePost } from "../../services/postService"
  
 
 
@@ -99,7 +100,10 @@ const NewPost = () => {
     }
 
     //create post
-
+    setLoading(true);
+    let res = createOrUpdatePost(data);
+    setLoading(false);
+    console.log('post res', res)
   }
 
   const player = useVideoPlayer(file?.uri ?? "", (player) => {
