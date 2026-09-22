@@ -70,7 +70,7 @@ const NewPost = () => {
     }
 
     //check image or video based on file extension
-    if (file.includes('postImage')) {
+    if (file.includes('postImages')) {
       return 'image';
     }
     return 'video';
