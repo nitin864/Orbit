@@ -1,8 +1,9 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Pressable, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from '../../assets/icons';
 import Avatar from '../../components/Avatar';
+import PostCard from '../../components/PostCard';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import { theme } from '../../constants/theme';
 import { useAuth } from '../../context/AuthContext';
@@ -17,7 +18,7 @@ const Home = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('forYou');
 
-  const [posts, setPosts] = useState();
+  const [posts, setPosts] = useState([]);
 
   useEffect(()=> {
      getPosts()
@@ -107,6 +108,20 @@ const Home = () => {
         })}
       </View>
 
+      {/* posts*/}
+      <FlatList
+          data={posts}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listStyle}
+          keyExtractor={item=> item.id.toString()}
+          renderItem={({item}) => <PostCard
+             item={item}
+             currentUser={user}
+             router={router}
+         />
+       }
+      />  
+  
       {/* ── Your original logout — kept as is ── */}
       <Text
         onPress={handleLogout}
@@ -175,6 +190,11 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.dark,
     borderBottomWidth: 1,
     borderBottomColor: '#1E2732',
+  },
+
+  listStyle: {
+    paddingTop: 20,
+    paddingHorizontal: wp(4)
   },
 
   glitchOuter: {
