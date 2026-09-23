@@ -6,6 +6,22 @@ import { theme } from '../constants/theme';
 import { hp, wp } from '../helpers/common';
 import Avatar from './Avatar';
 
+const textStyle = {
+  color: theme.colors.dark,
+  fontSize: hp(1.75),
+};
+
+const tagsStyles = {
+  div: textStyle,
+  p: textStyle,
+  ol: textStyle,
+  h1: {
+    color: theme.colors.dark,
+  },
+  h4: {
+    color: theme.colors.dark,
+  },
+};
 
 const PostCard = ({
      item,
@@ -59,6 +75,7 @@ const PostCard = ({
                 <RenderHTML
                    contentWidth={wp(100)}
                    source={{html: item?.body}}
+                   tagsStyles={tagsStyles}
                 />
             )
            }

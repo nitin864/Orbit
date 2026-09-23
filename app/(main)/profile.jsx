@@ -1,23 +1,24 @@
+import { useRouter } from 'expo-router'
+import { useEffect, useState } from 'react'
 import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
+  Alert,
   Pressable,
   ScrollView,
-  Alert,
   StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native'
-import React, { useState, useEffect } from 'react'
-import ScreenWrapper from '../../components/ScreenWrapper'
-import { useAuth } from '../../context/AuthContext'
-import { useRouter } from 'expo-router'
-import { theme } from '../../constants/theme'
-import { hp, wp } from '../../helpers/common'
+import RenderHTML from 'react-native-render-html'
 import Icon from '../../assets/icons'
 import Avatar from '../../components/Avatar'
-import { supabase } from '../../lib/supabse'
 import BackButton from '../../components/BackButton'
+import ScreenWrapper from '../../components/ScreenWrapper'
+import { theme } from '../../constants/theme'
+import { useAuth } from '../../context/AuthContext'
+import { hp, wp } from '../../helpers/common'
+import { supabase } from '../../lib/supabse'
 
 const UserHeader = ({ user, router, onLogout }) => {
 
@@ -268,7 +269,16 @@ const Profile = () => {
                     </TouchableOpacity>
                   </View>
                   {item?.body ? (
-                    <Text style={styles.postText}>{item.body}</Text>
+                    <Text style={styles.postText}>{
+                    
+                                item?.body && (
+                                    <RenderHTML
+                                       contentWidth={wp(100)}
+                                       source={{html: item?.body}}
+                                        
+                                    />
+                                )
+                               }</Text>
                   ) : null}
                   <View style={styles.postActions}>
                     <TouchableOpacity style={styles.actionBtn}>
