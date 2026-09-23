@@ -18,7 +18,7 @@ const Home = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('forYou');
 
-  const [posts, setPosts] = useState();
+  const [posts, setPosts] = useState([]);
 
   useEffect(()=> {
      getPosts()

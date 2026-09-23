@@ -1,6 +1,22 @@
 import { StyleSheet, Text, View } from 'react-native'
 
-const PostCard = () => {
+const PostCard = ({
+     item,
+    currentUser,
+    router,
+    hasShadow = true,
+}) => {
+
+    const shadowStyles = {
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+        elevation: 1
+    } 
+   
   return (
     <View>
       <Text>PostCard</Text>
