@@ -1,18 +1,28 @@
-import { Pressable, StyleSheet, Text, View, Alert, TouchableOpacity, FlatList, ActivityIndicator, StatusBar } from 'react-native';
-import React, { useState, useEffect } from 'react';
-import ScreenWrapper from '../../components/ScreenWrapper';
-import { supabase } from '../../lib/supabse';
-import { useAuth } from '../../context/AuthContext';
-import { wp, hp } from '../../helpers/common';
-import { theme } from '../../constants/theme';
-import Icon from '../../assets/icons';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Alert, Pressable, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Icon from '../../assets/icons';
 import Avatar from '../../components/Avatar';
+import ScreenWrapper from '../../components/ScreenWrapper';
+import { theme } from '../../constants/theme';
+import { useAuth } from '../../context/AuthContext';
+import { hp, wp } from '../../helpers/common';
+import { supabase } from '../../lib/supabse';
 
 const Home = () => {
   const { user, setAuth } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('forYou');
+
+  const [posts, setPosts] = useState();
+
+  useEffect(()=> {
+     getPosts()
+  }, [])
+
+  const getPosts = async()=>{
+
+  }
 
   console.log("User data:", user);
 
