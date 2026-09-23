@@ -8,6 +8,7 @@ import { theme } from '../../constants/theme';
 import { useAuth } from '../../context/AuthContext';
 import { hp, wp } from '../../helpers/common';
 import { supabase } from '../../lib/supabse';
+import { fetchPosts } from '../../services/postService';
 
 const Home = () => {
   const { user, setAuth } = useAuth();
@@ -21,7 +22,8 @@ const Home = () => {
   }, [])
 
   const getPosts = async()=>{
-
+     let res = await fetchPosts();
+     console.log('got posts result: ', res)
   }
 
   console.log("User data:", user);
