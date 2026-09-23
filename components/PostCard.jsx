@@ -1,9 +1,11 @@
 import { Icon } from 'expo-router';
 import moment from 'moment/moment';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import RenderHTML from 'react-native-render-html';
 import { theme } from '../constants/theme';
-import { hp } from '../helpers/common';
+import { hp, wp } from '../helpers/common';
 import Avatar from './Avatar';
+
 
 const PostCard = ({
      item,
@@ -23,7 +25,7 @@ const PostCard = ({
     } 
     
     const postDetails = () => {
-
+   //implementing it later
     }
     const createdAt = moment(item?.created_at).format('MMM D');
    
@@ -51,7 +53,15 @@ const PostCard = ({
 
       <View  style={styles.content}>
         <View style={styles.postBody}>
-            <Text>{item?.body}</Text>
+           {
+
+            item?.body && (
+                <RenderHTML
+                   contentWidth={wp(100)}
+                   source={{html: item?.body}}
+                />
+            )
+           }
         </View>
       </View>
     </View>
