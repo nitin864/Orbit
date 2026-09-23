@@ -8,6 +8,9 @@ import { theme } from '../../constants/theme';
 import { useAuth } from '../../context/AuthContext';
 import { hp, wp } from '../../helpers/common';
 import { supabase } from '../../lib/supabse';
+import { fetchPosts } from '../../services/postService';
+
+var limit = 10
 
 const Home = () => {
   const { user, setAuth } = useAuth();
@@ -21,7 +24,12 @@ const Home = () => {
   }, [])
 
   const getPosts = async()=>{
-
+    limit = limit + 10;
+    
+    let res = await fetchPosts(limit);
+    if(res.success){
+        setPosts(res.data);
+    }
   }
 
   console.log("User data:", user);
