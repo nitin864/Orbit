@@ -1,5 +1,6 @@
+import { Icon } from 'expo-router';
 import moment from 'moment/moment';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { theme } from '../constants/theme';
 import { hp } from '../helpers/common';
 import Avatar from './Avatar';
@@ -20,7 +21,10 @@ const PostCard = ({
         shadowRadius: 6,
         elevation: 1
     } 
+    
+    const postDetails = () => {
 
+    }
     const createdAt = moment(item?.created_at).format('MMM D');
    
   return (
@@ -38,6 +42,16 @@ const PostCard = ({
                 <Text style={styles.username}>{item?.user?.name}</Text>
                 <Text style={styles.postTime}>{createdAt}</Text>
             </View>
+        </View>
+
+        <TouchableOpacity>
+            <Icon name="threeDotsHorizontal" size={hp(3.4)} strokWidth={3} color={theme.colors.gray}/>
+        </TouchableOpacity>
+      </View>
+
+      <View  style={styles.content}>
+        <View style={styles.postBody}>
+            <Text>{item?.body}</Text>
         </View>
       </View>
     </View>
@@ -74,5 +88,8 @@ const styles = StyleSheet.create({
     },
     postTime:{
       color: "gray"
+    },
+    postBody:{
+      color: theme.colors.gray
     }
 })
