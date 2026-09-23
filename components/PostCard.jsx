@@ -1,3 +1,4 @@
+import moment from 'moment/moment';
 import { StyleSheet, Text, View } from 'react-native';
 import { theme } from '../constants/theme';
 import { hp } from '../helpers/common';
@@ -19,6 +20,8 @@ const PostCard = ({
         shadowRadius: 6,
         elevation: 1
     } 
+
+    const createdAt = moment(item?.created_at).format('MMM D');
    
   return (
     <View style={[styles.container, hasShadow && shadowStyles]}>
@@ -33,7 +36,7 @@ const PostCard = ({
 
             <View style={{gap: 2}}>
                 <Text style={styles.username}>{item?.user?.name}</Text>
-                <Text style={styles.postTime}>{item?.created_at}</Text>
+                <Text style={styles.postTime}>{createdAt}</Text>
             </View>
         </View>
       </View>
