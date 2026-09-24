@@ -1,4 +1,5 @@
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
+import { Video } from 'expo-av';
 import { Image } from 'expo-image';
 import moment from 'moment/moment';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -48,17 +49,13 @@ const PostCard = ({
 
   const createdAt = moment(item?.created_at).format('MMM D');
 
-  // getSupabaseFileUrl can return either a string or { uri: string } depending
-  // on your implementation — this makes the check work either way.
+  
   const fileUrl = item?.file ? getSupabaseFileUrl(item.file) : null;
   const isImage = item?.file && !item?.file?.includes('postVideos');
+  const isVideos = item?.file && !item?.file?.includes('postImages');
 
   if (item?.file) {
-    // TEMP DEBUG: check your Metro/console logs to see the exact URL
-    // being requested. If this URL doesn't open correctly in a browser,
-    // the problem is in getSupabaseFileUrl or your Supabase bucket policy,
-    // not in this component.
-    console.log('PostCard file ->', item.file, '| resolved ->', fileUrl);
+     
   }
 
   return (
@@ -100,43 +97,23 @@ const PostCard = ({
             transition={100}
             style={styles.postMedia}
             contentFit="cover"
-            onError={(e) => console.log('Image failed to load ->', e?.error || e)}
+            
           />
         )}
+        {/* post videos */}
+        {fileUrl && isVideos && (
+          <Video
+            source={fileUrl}
+            transition={100}
+            style={styles.postMedia}
+            contentFit="cover"
+          />
+        )
+
+        }
       </View>
 
-      {/* action bar */}
-      <View style={styles.footer}>
-        <View style={styles.footerButton}>
-          <TouchableOpacity onPress={postDetails}>
-            <Feather name="message-circle" size={hp(2.4)} color={theme.colors.textLight} />
-          </TouchableOpacity>
-          <Text style={styles.count}>{item?.comments?.[0]?.count || 0}</Text>
-        </View>
-
-        <View style={styles.footerButton}>
-          <TouchableOpacity>
-            <Feather name="repeat" size={hp(2.4)} color={theme.colors.textLight} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.footerButton}>
-          <TouchableOpacity>
-            <Ionicons
-              name={item?.liked ? 'heart' : 'heart-outline'}
-              size={hp(2.6)}
-              color={item?.liked ? theme.colors.rose : theme.colors.textLight}
-            />
-          </TouchableOpacity>
-          <Text style={styles.count}>{item?.likes?.length || 0}</Text>
-        </View>
-
-        <View style={styles.footerButton}>
-          <TouchableOpacity>
-            <Feather name="send" size={hp(2.2)} color={theme.colors.textLight} />
-          </TouchableOpacity>
-        </View>
-      </View>
+       
     </View>
   );
 };
