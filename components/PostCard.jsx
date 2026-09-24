@@ -1,6 +1,6 @@
-import { Feather } from '@expo/vector-icons';
-import { Video } from 'expo-av';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import moment from 'moment/moment';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import RenderHTML from 'react-native-render-html';
@@ -49,14 +49,15 @@ const PostCard = ({
 
   const createdAt = moment(item?.created_at).format('MMM D');
 
-  
   const fileUrl = item?.file ? getSupabaseFileUrl(item.file) : null;
-  const isImage = item?.file && !item?.file?.includes('postVideos');
-  const isVideos = item?.file && !item?.file?.includes('postImages');
+  const isVideo = item?.file?.includes('postVideos');
+  const isImage = item?.file && !isVideo;
 
-  if (item?.file) {
-     
-  }
+  // useVideoPlayer must be called unconditionally (rules of hooks). Passing
+  // null is fine — the player just stays idle until a real video URI is set.
+  const player = useVideoPlayer(isVideo ? fileUrl?.uri : null, (p) => {
+    p.loop = false;
+  });
 
   return (
     <View style={[styles.container, hasShadow && shadowStyles]}>
@@ -97,23 +98,52 @@ const PostCard = ({
             transition={100}
             style={styles.postMedia}
             contentFit="cover"
-            
           />
         )}
-        {/* post videos */}
-        {fileUrl && isVideos && (
-          <Video
-            source={fileUrl}
-            transition={100}
+
+        {fileUrl && isVideo && (
+          <VideoView
             style={styles.postMedia}
+            player={player}
+            allowsFullscreen
+            allowsPictureInPicture
             contentFit="cover"
           />
-        )
-
-        }
+        )}
       </View>
 
-       
+      {/* action bar */}
+      <View style={styles.footer}>
+        <View style={styles.footerButton}>
+          <TouchableOpacity onPress={postDetails}>
+            <Feather name="message-circle" size={hp(2.4)} color={theme.colors.textLight} />
+          </TouchableOpacity>
+          <Text style={styles.count}>{item?.comments?.[0]?.count || 0}</Text>
+        </View>
+
+        <View style={styles.footerButton}>
+          <TouchableOpacity>
+            <Feather name="repeat" size={hp(2.4)} color={theme.colors.textLight} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.footerButton}>
+          <TouchableOpacity>
+            <Ionicons
+              name={item?.liked ? 'heart' : 'heart-outline'}
+              size={hp(2.6)}
+              color={item?.liked ? theme.colors.rose : theme.colors.textLight}
+            />
+          </TouchableOpacity>
+          <Text style={styles.count}>{item?.likes?.length || 0}</Text>
+        </View>
+
+        <View style={styles.footerButton}>
+          <TouchableOpacity>
+            <Feather name="send" size={hp(2.2)} color={theme.colors.textLight} />
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 };

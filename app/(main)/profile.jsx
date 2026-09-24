@@ -7,22 +7,19 @@ import {
   StatusBar,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native'
-import RenderHTML from 'react-native-render-html'
 import Icon from '../../assets/icons'
 import Avatar from '../../components/Avatar'
 import BackButton from '../../components/BackButton'
+import PostCard from '../../components/PostCard'
 import ScreenWrapper from '../../components/ScreenWrapper'
 import { theme } from '../../constants/theme'
 import { useAuth } from '../../context/AuthContext'
 import { hp, wp } from '../../helpers/common'
 import { supabase } from '../../lib/supabse'
 
-const UserHeader = ({ user, router, onLogout }) => {
-
-  const [stats] = useState({ posts: 0, followers: 0, following: 0 })
+const UserHeader = ({ user, router, onLogout, stats }) => {
 
   return (
     <View style={styles.headerWrap}>
@@ -157,20 +154,23 @@ const Profile = () => {
   const router = useRouter()
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0 })
 
   useEffect(() => {
     fetchUserPosts()
+    fetchStats()
   }, [])
 
   const fetchUserPosts = async () => {
     if (!user?.id) return
     setLoading(true)
+    // Aliased as `user` and `likes` to match what <PostCard /> expects.
     const { data, error } = await supabase
       .from('posts')
       .select(`
         *,
-        users (id, name, image),
-        postLikes (id, userId),
+        user:users (id, name, image),
+        likes:postLikes (id, userId),
         comments (id)
       `)
       .eq('userId', user.id)
@@ -180,8 +180,45 @@ const Profile = () => {
       console.log('Error fetching user posts:', error.message)
     } else {
       setPosts(data || [])
+      // Real post count, straight from what we just fetched.
+      setStats((prev) => ({ ...prev, posts: data?.length || 0 }))
     }
     setLoading(false)
+  }
+
+  const fetchStats = async () => {
+    if (!user?.id) return
+
+    // NOTE: this assumes a `followers` table with `follower_id` and
+    // `following_id` columns. If your follow system uses different
+    // table/column names, update the two queries below to match —
+    // everything else here will keep working as-is.
+    try {
+      const [{ count: followersCount, error: followersError }, { count: followingCount, error: followingError }] =
+        await Promise.all([
+          supabase
+            .from('followers')
+            .select('*', { count: 'exact', head: true })
+            .eq('following_id', user.id),
+          supabase
+            .from('followers')
+            .select('*', { count: 'exact', head: true })
+            .eq('follower_id', user.id),
+        ])
+
+      if (followersError || followingError) {
+        console.log('Follow stats unavailable (check table/column names):', followersError?.message || followingError?.message)
+        return
+      }
+
+      setStats((prev) => ({
+        ...prev,
+        followers: followersCount || 0,
+        following: followingCount || 0,
+      }))
+    } catch (err) {
+      console.log('Error fetching follow stats:', err.message)
+    }
   }
 
   const handleLogout = async () => {
@@ -213,94 +250,40 @@ const Profile = () => {
         contentContainerStyle={styles.scrollContent}
       >
 
-        <UserHeader user={user} router={router} onLogout={handleLogout} />
+        <UserHeader user={user} router={router} onLogout={handleLogout} stats={stats} />
 
         {/* Posts feed */}
-        {loading ? (
-          <View style={styles.loaderWrap}>
-            <Text style={styles.loadingText}>Loading posts...</Text>
-          </View>
-        ) : posts.length === 0 ? (
-          <View style={styles.emptyWrap}>
-            <Icon name="image" size={48} color={theme.colors.textLight} strokeWidth={1.2} />
-            <Text style={styles.emptyTitle}>No posts yet</Text>
-            <Text style={styles.emptyText}>
-              Share something with your orbit.
-            </Text>
-            <Pressable
-              style={styles.newPostBtn}
-              onPress={() => router.push('/newPost')}
-            >
-              <Text style={styles.newPostBtnText}>Create your first post</Text>
-            </Pressable>
-          </View>
-        ) : (
-          posts.map((item) => {
-            const initials = item?.users?.name
-              ? item.users.name.slice(0, 2).toUpperCase()
-              : '?'
-            return (
-              <View key={item.id} style={styles.postCard}>
-                <View style={styles.avatarCol}>
-                  <View style={styles.postAvatar}>
-                    <Text style={styles.postAvatarText}>{initials}</Text>
-                  </View>
-                  <View style={styles.threadLine} />
-                </View>
-                <View style={styles.postContent}>
-                  <View style={styles.postHeader}>
-                    <Text style={styles.postName}>{item?.users?.name || 'Unknown'}</Text>
-                    <Text style={styles.postHandle}>
-                      {' '}@{item?.users?.name?.toLowerCase().replace(' ', '') || 'user'}
-                    </Text>
-                    <Text style={styles.postDot}> · </Text>
-                    <Text style={styles.postTime} numberOfLines={1}>
-                      {item?.created_at
-                        ? new Date(item.created_at).toLocaleDateString()
-                        : ''}
-                    </Text>
-                    <TouchableOpacity style={styles.moreBtn}>
-                      <Icon
-                        name="threeDotsHorizontal"
-                        size={16}
-                        color={theme.colors.textLight}
-                        strokeWidth={2}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  {item?.body ? (
-                    <Text style={styles.postText}>{
-                    
-                                item?.body && (
-                                    <RenderHTML
-                                       contentWidth={wp(100)}
-                                       source={{html: item?.body}}
-                                        
-                                    />
-                                )
-                               }</Text>
-                  ) : null}
-                  <View style={styles.postActions}>
-                    <TouchableOpacity style={styles.actionBtn}>
-                      <Icon name="comment" size={18} color={theme.colors.textLight} strokeWidth={1.8} />
-                      <Text style={styles.actionCount}>{item?.comments?.length || 0}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionBtn}>
-                      <Icon name="share" size={18} color={theme.colors.textLight} strokeWidth={1.8} />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionBtn}>
-                      <Icon name="heart" size={18} color={theme.colors.textLight} strokeWidth={1.8} />
-                      <Text style={styles.actionCount}>{item?.postLikes?.length || 0}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionBtn}>
-                      <Icon name="send" size={18} color={theme.colors.textLight} strokeWidth={1.8} />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            )
-          })
-        )}
+        <View style={styles.postsWrap}>
+          {loading ? (
+            <View style={styles.loaderWrap}>
+              <Text style={styles.loadingText}>Loading posts...</Text>
+            </View>
+          ) : posts.length === 0 ? (
+            <View style={styles.emptyWrap}>
+              <Icon name="image" size={48} color={theme.colors.textLight} strokeWidth={1.2} />
+              <Text style={styles.emptyTitle}>No posts yet</Text>
+              <Text style={styles.emptyText}>
+                Share something with your orbit.
+              </Text>
+              <Pressable
+                style={styles.newPostBtn}
+                onPress={() => router.push('/newPost')}
+              >
+                <Text style={styles.newPostBtnText}>Create your first post</Text>
+              </Pressable>
+            </View>
+          ) : (
+            posts.map((item) => (
+              <PostCard
+                key={item.id}
+                item={item}
+                currentUser={user}
+                router={router}
+                hasShadow={false}
+              />
+            ))
+          )}
+        </View>
 
       </ScrollView>
 
@@ -632,113 +615,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 
-  // ── Post Cards ───────────────────────────────
-  postCard: {
-    flexDirection: 'row',
-    paddingHorizontal: wp(4),
-    paddingTop: hp(1.8),
-    paddingBottom: hp(0.5),
-    backgroundColor: theme.colors.dark,
-    borderBottomWidth: 1,
-    borderBottomColor: '#1E2732',
-  },
-
-  avatarCol: {
-    alignItems: 'center',
-    marginRight: 12,
-  },
-
-  postAvatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: theme.colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  postAvatarText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#fff',
-    fontFamily: 'System',
-  },
-
-  threadLine: {
-    width: 2,
-    flex: 1,
-    backgroundColor: '#1E2732',
-    marginTop: 8,
-    borderRadius: 1,
-    minHeight: 20,
-  },
-
-  postContent: {
-    flex: 1,
-    paddingBottom: hp(1.5),
-  },
-
-  postHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-
-  postName: {
-    fontSize: hp(1.7),
-    fontWeight: '700',
-    color: '#FFFFFF',
-    fontFamily: 'System',
-  },
-
-  postHandle: {
-    fontSize: hp(1.55),
-    color: theme.colors.textLight,
-    fontFamily: 'System',
-  },
-
-  postDot: {
-    fontSize: hp(1.55),
-    color: theme.colors.textLight,
-  },
-
-  postTime: {
-    fontSize: hp(1.55),
-    color: theme.colors.textLight,
-    fontFamily: 'System',
-    flex: 1,
-  },
-
-  moreBtn: {
-    padding: 4,
-  },
-
-  postText: {
-    fontSize: hp(1.85),
-    color: '#E7E9EA',
-    lineHeight: hp(2.8),
-    fontFamily: 'System',
-    letterSpacing: 0.1,
-    marginBottom: hp(1.2),
-  },
-
-  postActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingRight: wp(8),
-    marginTop: 4,
-  },
-
-  actionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-
-  actionCount: {
-    fontSize: hp(1.55),
-    color: theme.colors.textLight,
-    fontFamily: 'System',
+  // ── Posts feed wrapper ───────────────────────
+  postsWrap: {
+    paddingHorizontal: wp(3),
+    paddingTop: hp(1),
   },
 
 })
