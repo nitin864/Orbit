@@ -1,6 +1,6 @@
 import { decode } from 'base64-arraybuffer';
 import * as FileSystem from 'expo-file-system/legacy';
-import { supabase } from '../lib/supabse';
+import { supabase, supabaseUrl } from '../lib/supabse';
 
 export const getUserImage = (imagePath) => {
   if (imagePath) {
@@ -60,3 +60,10 @@ export const uploadFile = async (
 export const getFilePath = (folderName, isImage) => {
   return `/${folderName}/${Date.now()}${isImage ? '.jpg' : '.mp4'}`;
 };
+
+export const getSupabaseFileUrl = filePath => {
+    if (filePath) {
+        return { uri: `${supabaseUrl}/storage/v1/object/public/uploads/${filePath}` }
+    }
+    return null;
+}

@@ -1,13 +1,15 @@
-import { Icon } from 'expo-router';
+import { Feather, Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import moment from 'moment/moment';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import RenderHTML from 'react-native-render-html';
 import { theme } from '../constants/theme';
 import { hp, wp } from '../helpers/common';
+import { getSupabaseFileUrl } from '../services/imageService';
 import Avatar from './Avatar';
 
 const textStyle = {
-  color: theme.colors.dark,
+  color: theme.colors.textDark,
   fontSize: hp(1.75),
 };
 
@@ -16,107 +18,192 @@ const tagsStyles = {
   p: textStyle,
   ol: textStyle,
   h1: {
-    color: theme.colors.dark,
+    color: '#FFFFFF',
   },
   h4: {
-    color: theme.colors.dark,
+    color: '#FFFFFF',
   },
 };
 
 const PostCard = ({
-     item,
-    currentUser,
-    router,
-    hasShadow = true,
+  item,
+  currentUser,
+  router,
+  hasShadow = true,
 }) => {
 
-    const shadowStyles = {
-        shadowOffset: {
-            width: 0,
-            height: 2
-        },
-        shadowOpacity: 0.06,
-        shadowRadius: 6,
-        elevation: 1
-    } 
-    
-    const postDetails = () => {
-   //implementing it later
-    }
-    const createdAt = moment(item?.created_at).format('MMM D');
-   
+  const shadowStyles = {
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 1,
+  };
+
+  const postDetails = () => {
+    // implementing it later
+  };
+
+  const createdAt = moment(item?.created_at).format('MMM D');
+
+  // getSupabaseFileUrl can return either a string or { uri: string } depending
+  // on your implementation — this makes the check work either way.
+  const fileUrl = item?.file ? getSupabaseFileUrl(item.file) : null;
+  const isImage = item?.file && !item?.file?.includes('postVideos');
+
+  if (item?.file) {
+    // TEMP DEBUG: check your Metro/console logs to see the exact URL
+    // being requested. If this URL doesn't open correctly in a browser,
+    // the problem is in getSupabaseFileUrl or your Supabase bucket policy,
+    // not in this component.
+    console.log('PostCard file ->', item.file, '| resolved ->', fileUrl);
+  }
+
   return (
     <View style={[styles.container, hasShadow && shadowStyles]}>
-      <View style = {styles.header}>
+      <View style={styles.header}>
         <View style={styles.userInfo}>
-            <Avatar
-              size={hp(4.5)}
-              uri={item?.user?.image}
-              rounded={theme.radius.md}
+          <Avatar
+            size={hp(4.5)}
+            uri={item?.user?.image}
+            rounded={theme.radius.md}
+          />
 
-            />
-
-            <View style={{gap: 2}}>
-                <Text style={styles.username}>{item?.user?.name}</Text>
-                <Text style={styles.postTime}>{createdAt}</Text>
-            </View>
+          <View style={{ gap: 2 }}>
+            <Text style={styles.username}>{item?.user?.name}</Text>
+            <Text style={styles.postTime}>{createdAt}</Text>
+          </View>
         </View>
 
-        <TouchableOpacity>
-            <Icon name="threeDotsHorizontal" size={hp(3.4)} strokWidth={3} color={theme.colors.gray}/>
+        <TouchableOpacity onPress={postDetails}>
+          <Feather name="more-horizontal" size={hp(3)} color={theme.colors.textLight} />
         </TouchableOpacity>
       </View>
 
-      <View  style={styles.content}>
+      <View style={styles.content}>
         <View style={styles.postBody}>
-           {
+          {item?.body && (
+            <RenderHTML
+              contentWidth={wp(100)}
+              source={{ html: item?.body }}
+              tagsStyles={tagsStyles}
+            />
+          )}
+        </View>
 
-            item?.body && (
-                <RenderHTML
-                   contentWidth={wp(100)}
-                   source={{html: item?.body}}
-                   tagsStyles={tagsStyles}
-                />
-            )
-           }
+        {/* post media */}
+        {fileUrl && isImage && (
+          <Image
+            source={fileUrl}
+            transition={100}
+            style={styles.postMedia}
+            contentFit="cover"
+            onError={(e) => console.log('Image failed to load ->', e?.error || e)}
+          />
+        )}
+      </View>
+
+      {/* action bar */}
+      <View style={styles.footer}>
+        <View style={styles.footerButton}>
+          <TouchableOpacity onPress={postDetails}>
+            <Feather name="message-circle" size={hp(2.4)} color={theme.colors.textLight} />
+          </TouchableOpacity>
+          <Text style={styles.count}>{item?.comments?.[0]?.count || 0}</Text>
+        </View>
+
+        <View style={styles.footerButton}>
+          <TouchableOpacity>
+            <Feather name="repeat" size={hp(2.4)} color={theme.colors.textLight} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.footerButton}>
+          <TouchableOpacity>
+            <Ionicons
+              name={item?.liked ? 'heart' : 'heart-outline'}
+              size={hp(2.6)}
+              color={item?.liked ? theme.colors.rose : theme.colors.textLight}
+            />
+          </TouchableOpacity>
+          <Text style={styles.count}>{item?.likes?.length || 0}</Text>
+        </View>
+
+        <View style={styles.footerButton}>
+          <TouchableOpacity>
+            <Feather name="send" size={hp(2.2)} color={theme.colors.textLight} />
+          </TouchableOpacity>
         </View>
       </View>
     </View>
-  )
-}
+  );
+};
 
-export default PostCard
+export default PostCard;
 
 const styles = StyleSheet.create({
-
-    container: {
-        gap: 10,
-        marginBottom:15,
-        borderRadius: theme.radius.xxl*1.1,
-        borderCurve: 'continuous',
-        padding: 10,
-        paddingVertical:12,
-        backgroundColor: '#0F1419',
-        borderWidth: 0.5,
-        borderColor: theme.colors.gray,
-        shadowColor: '#000'
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between'
-    },
-    userInfo: {
-       flexDirection: 'row',
-       alignItems: 'center',
-       gap: 8
-    },
-    username: {
-        color: "white"
-    },
-    postTime:{
-      color: "gray"
-    },
-    postBody:{
-      color: theme.colors.gray
-    }
-})
+  container: {
+    gap: 10,
+    marginBottom: 15,
+    borderRadius: 18,
+    borderCurve: 'continuous',
+    padding: 10,
+    paddingVertical: 12,
+    backgroundColor: theme.colors.darkLight,
+    borderWidth: 0.5,
+    borderColor: '#2F3336',
+    shadowColor: '#000',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  username: {
+    color: '#FFFFFF',
+    fontSize: hp(1.9),
+    fontWeight: theme.fonts.semibold,
+  },
+  postTime: {
+    color: theme.colors.textLight,
+    fontWeight: theme.fonts.medium,
+    fontSize: hp(1.5),
+  },
+  content: {
+    gap: 10,
+  },
+  postBody: {
+    marginLeft: 5,
+  },
+  postMedia: {
+    height: hp(40),
+    width: '100%',
+    borderRadius: 14,
+    borderCurve: 'continuous',
+    backgroundColor: theme.colors.dark,
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingTop: 8,
+    borderTopWidth: 0.5,
+    borderTopColor: '#2F3336',
+  },
+  footerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  count: {
+    color: theme.colors.textLight,
+    fontSize: hp(1.6),
+  },
+});
