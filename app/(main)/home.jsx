@@ -122,13 +122,7 @@ const Home = () => {
        }
       />  
   
-      {/* ── Your original logout — kept as is ── */}
-      <Text
-        onPress={handleLogout}
-        style={{ margin: 20, color: 'red', fontSize: hp(2.2) }}
-      >
-        Logout
-      </Text>
+ 
 
       {/* ── FAB ── */}
       <TouchableOpacity
